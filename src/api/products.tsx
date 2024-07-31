@@ -1,7 +1,7 @@
 import { CreateProducts, UpdateProducts } from "../interface/products.interface";
 
 // Configuración de la API
-const API = "https://jumahumitosback.onrender.com/";
+const API = "https://jumahumitosback.onrender.com";
 
 // Función para obtener productos
 export const getProductsRequest = async () => {
