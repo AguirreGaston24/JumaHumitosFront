@@ -213,7 +213,7 @@ function ProductDetail() {
               <div className="mt-8">
                 <h1 className="text-2xl font-bold ">Product Detail</h1>
                 <div ref={qrRef} className="mb-4 flex justify-center">
-                  <QRCode value={`https://jumahumitosback.onrender.com/product/${product.code}`} />
+                  <QRCode value={`https://jumahumitosfront.onrender.com/product/${product.code}`} />
                 </div>
                 <button
                   onClick={downloadQRCode}
