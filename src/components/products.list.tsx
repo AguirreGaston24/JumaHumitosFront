@@ -5,12 +5,12 @@ import { useProducts } from "../context/products.context";
 
 function ProductsList() {
   const { products } = useProducts();
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [lineFilter, setLineFilter] = useState("");
-  const [scentFilter, setScentFilter] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
+  const [search, setSearch] = useState(""); // Estado para el término de búsqueda
+  const [typeFilter, setTypeFilter] = useState(""); // Estado para el filtro de tipo
+  const [brandFilter, setBrandFilter] = useState(""); // Estado para el filtro de marca
+  const [lineFilter, setLineFilter] = useState(""); // Estado para el filtro de línea
+  const [scentFilter, setScentFilter] = useState(""); // Estado para el filtro de aroma
+  const [showAlert, setShowAlert] = useState(false); // Estado para mostrar alerta cuando no se encuentran productos
 
   // Extraer opciones únicas de los productos para los filtros
   const uniqueTypes = Array.from(new Set(products.map(p => p.type).filter(t => t)));
@@ -27,7 +27,7 @@ function ProductsList() {
     (scentFilter === "" || (product.scent && product.scent.toLowerCase().includes(scentFilter.toLowerCase())))
   );
 
-  // Mostrar alerta si no se encuentran productos
+  // Mostrar alerta si no se encuentran productos que coincidan con los criterios de búsqueda
   useEffect(() => {
     if (search && filteredProducts.length === 0) {
       setShowAlert(true);
@@ -38,71 +38,82 @@ function ProductsList() {
 
   return (
     <div className="h-screen bg-black text-white flex flex-col">
-      {/* Contenedor para el título y el botón */}
+      {/* Contenedor para el título y los botones */}
       <header className="flex items-center justify-between p-4 bg-gray-800">
         {/* Buscador alineado a la izquierda */}
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Search by code..."
+            placeholder="Buscar por código..."
             className="p-2 rounded-lg bg-gray-700 text-white w-full sm:w-64"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         {/* Título centrado */}
-        <div className="flex-1 flex ">
+        <div className="flex-1 flex justify-center">
           <h1 className="text-3xl font-bold">Juma Humitos</h1>
         </div>
-        {/* Botón alineado a la derecha */}
+        {/* Botones alineados a la derecha */}
         <div className="flex-none">
-          <Link to="/add-product">
-            <button className="bg-green-500 text-white px-5 py-2 rounded-lg">
-              Add Product
-            </button>
-          </Link>
+          <div className="flex flex-col space-y-4">
+            <Link to="/add-product">
+              <button className="bg-green-500 text-white px-5 py-2 rounded-lg">
+                Agregar Producto
+              </button>
+            </Link>
+            <Link to="/scan">
+              <button className="bg-green-500 text-white px-5 py-2 rounded-lg">
+                Escanear
+              </button>
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Contenedor de filtros */}
       <div className="p-4 bg-gray-800">
         <div className="flex flex-wrap gap-10 mb-4">
+          {/* Filtro por tipo */}
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             className="p-2 rounded-lg bg-gray-700 text-white w-full md:w-60"
           >
-            <option value="">Filter by type...</option>
+            <option value="">Filtrar por tipo...</option>
             {uniqueTypes.map((type, index) => (
               <option key={index} value={type}>{type}</option>
             ))}
           </select>
+          {/* Filtro por marca */}
           <select
             value={brandFilter}
             onChange={(e) => setBrandFilter(e.target.value)}
             className="p-2 rounded-lg bg-gray-700 text-white w-full md:w-60"
           >
-            <option value="">Filter by brand...</option>
+            <option value="">Filtrar por marca...</option>
             {uniqueBrands.map((brand, index) => (
               <option key={index} value={brand}>{brand}</option>
             ))}
           </select>
+          {/* Filtro por línea */}
           <select
             value={lineFilter}
             onChange={(e) => setLineFilter(e.target.value)}
             className="p-2 rounded-lg bg-gray-700 text-white w-full md:w-60"
           >
-            <option value="">Filter by line...</option>
+            <option value="">Filtrar por línea...</option>
             {uniqueLines.map((line, index) => (
               <option key={index} value={line}>{line}</option>
             ))}
           </select>
+          {/* Filtro por aroma */}
           <select
             value={scentFilter}
             onChange={(e) => setScentFilter(e.target.value)}
             className="p-2 rounded-lg bg-gray-700 text-white w-full md:w-60"
           >
-            <option value="">Filter by scent...</option>
+            <option value="">Filtrar por aroma...</option>
             {uniqueScents.map((scent, index) => (
               <option key={index} value={scent}>{scent}</option>
             ))}
@@ -110,19 +121,22 @@ function ProductsList() {
         </div>
       </div>
 
+      {/* Contenedor principal para los productos */}
       <main className="flex-1 p-4">
+        {/* Mostrar alerta si no se encuentran productos */}
         {showAlert && (
           <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-center">
-            Product not found
+            No se encontraron productos
           </div>
         )}
+        {/* Mostrar productos filtrados */}
         <div className="flex flex-col gap-4">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <ProductsItem products={product} key={product._id} />
             ))
           ) : (
-            <p className="text-center text-xl font-bold my-4">No products match the criteria</p>
+            <p className="text-center text-xl font-bold my-4">No hay productos que coincidan con los criterios</p>
           )}
         </div>
       </main>

@@ -7,66 +7,90 @@ interface Props {
 }
 
 function ProductsItem({ products }: Props) {
-  const { deleteProduct, updateProduct } = useProducts();
+  const { deleteProduct, sellProduct } = useProducts();
+
+  // Maneja la venta de un producto
+  const handleSell = async () => {
+    // Confirmar la acción con el usuario
+    if (window.confirm("Are you sure you want to sell this product?")) {
+      try {
+        // Llama a la función para vender el producto
+        await sellProduct(products.code);
+        alert("Producto vendido");
+      } catch (error) {
+        console.error("Error selling product:", error);
+        alert("Failed to sell product");
+      }
+    }
+  };
 
   return (
-    <div className="bg-gray-900 p-4 my-2 flex flex-col sm:flex-row items-start justify-between hover:bg-gray-800 hover:cursor-pointer rounded-lg">
+    <div className="bg-white p-4 my-2 flex flex-col sm:flex-row items-start justify-between hover:bg-gray-100 hover:cursor-pointer rounded-lg shadow-md transition-transform transform hover:scale-105">
       {/* Información del producto */}
-      <div className="flex-1 flex flex-wrap gap-12 mt-4 sm:mt-0">
-        {/* Mostrar el código y el tipo del producto */}
+      <div className="flex-1 flex flex-wrap gap-4">
+        {/* Información básica del producto */}
         <div className="flex flex-col items-start">
-          <p className="text-sm font-semibold">Code:</p>
-          <h3 className="font-bold text-lg">{products.code}</h3>
+          <p className="text-sm font-semibold text-gray-700">Código:</p>
+          <h3 className="font-bold text-xl text-gray-900">{products.code}</h3>
         </div>
         <div className="flex flex-col items-start">
-          <p className="text-sm font-semibold">Type:</p>
-          <p className="text-slate-400">{products.type}</p>
+          <p className="text-sm font-semibold text-gray-700">Tipo:</p>
+          <p className="text-gray-600">{products.type}</p>
         </div>
 
-        {/* Información adicional del producto */}
+        {/* Información adicional */}
         <div className="flex flex-col items-start">
-          <p className="text-sm font-semibold">Brand:</p>
-          <p className="text-sm">{products.brand}</p>
+          <p className="text-sm font-semibold text-gray-700">Marca:</p>
+          <p className="text-gray-600">{products.brand}</p>
         </div>
         <div className="flex flex-col items-start">
-          <p className="text-sm font-semibold">Line:</p>
-          <p className="text-sm">{products.line}</p>
+          <p className="text-sm font-semibold text-gray-700">Línea:</p>
+          <p className="text-gray-600">{products.line}</p>
         </div>
         <div className="flex flex-col items-start">
-          <p className="text-sm font-semibold">Scent:</p>
-          <p className="text-sm">{products.scent}</p>
+          <p className="text-sm font-semibold text-gray-700">Aroma:</p>
+          <p className="text-gray-600">{products.scent}</p>
+        </div>
+        <div className="flex flex-col items-start">
+          <p className="text-sm font-semibold text-gray-700">Disponibles:</p>
+          {/* Mostrar cantidad disponible */}
+          <p className="text-gray-900 font-bold">{products.available}</p>
+        </div>    <div className="flex flex-col items-start">
+          <p className="text-sm font-semibold text-gray-700">Precio:</p>
+          {/* Mostrar precio formateado */}
+          <p className="text-gray-900 font-bold">${products.price.toFixed(2)}</p>
         </div>
       </div>
 
-      {/* Botones */}
+      {/* Botones de acción */}
       <div className="flex flex-col sm:flex-row gap-2 ml-4 mt-4 sm:mt-0 items-center">
-        {/* Botón para acceder al detalle del producto */}
+        {/* Botón para ver detalles del producto */}
         <Link to={`/products/${products.code}`} className="w-full sm:w-auto">
-          <button className="bg-blue-500 text-white px-3 py-1 rounded-lg w-full sm:w-auto">
-            View Details
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-blue-700 transition-colors">
+            Ver Detalles
           </button>
         </Link>
 
         {/* Botón para eliminar el producto */}
         <button
           onClick={() => {
-            if (!window.confirm("Are you sure you want to delete this product?")) return;
-            deleteProduct(products.code);
+            // Confirmar la eliminación del producto
+            if (window.confirm("Are you sure you want to delete this product?")) {
+              deleteProduct(products.code);
+            }
           }}
-          className="bg-red-500 text-white px-3 py-1 rounded-lg w-full sm:w-auto"
+          className="bg-red-600 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-red-700 transition-colors"
         >
-          Delete
+          Eliminar
         </button>
 
-        {/* Botón para actualizar el estado del producto */}
+        {/* Botón para vender el producto */}
         <button
-          onClick={() => updateProduct(products.code, { stock: !products.stock })}
-          className={`px-3 py-1 rounded-lg ${products.stock ? 'bg-yellow-500' : 'bg-gray-500'} text-white w-full sm:w-auto`}
+          onClick={handleSell}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-green-700 transition-colors"
         >
-          {products.stock ? 'Mark as Out of Stock' : 'Mark as In Stock'}
+          Vender
         </button>
-
-
       </div>
     </div>
   );

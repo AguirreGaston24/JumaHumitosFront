@@ -3,6 +3,7 @@ import ProductsForm from "./components/productsForm";
 import ProductsList from "./components/products.list";
 import ProductDetail from "./components/ProductDetail";
 import { ProductProvider } from "./context/products.context";
+import ScanProduct from './components/ScanProduct';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path="/" element={<ProductsList />} />
             <Route path="/products/:code" element={<ProductDetail />} />
             <Route path="/add-product" element={<ProductsForm />} />
+            <Route path="/scan" element={<ScanProduct />} />
             {/* Redirige a la página de inicio (/) por defecto */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

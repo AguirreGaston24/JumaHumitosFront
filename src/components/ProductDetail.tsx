@@ -11,41 +11,35 @@ function ProductDetail() {
   const [formData, setFormData] = useState<Products | null>(null);
   const qrRef = useRef<HTMLDivElement>(null);
 
+  // Obtén los detalles del producto cuando el componente se monta o cambia el código del producto
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         if (code) {
           const productData = await getProductRequest(parseInt(code, 10));
           setProduct(productData);
-          setFormData({ ...productData }); // Make a copy of the product data
+          setFormData({ ...productData }); // Inicializa formData con los datos del producto
         }
       } catch (error) {
-        console.error("Error fetching product:", error);
+        console.error("Error al obtener el producto:", error);
       }
     };
 
     fetchProduct();
   }, [code]);
 
-  if (!product) {
-    return <p>Loading...</p>;
-  }
-
-  const handleEditClick = () => {
-    setIsEditing(true);
-  };
-
+  // Maneja los cambios en los campos del formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type} = e.target;
   
     if (type === 'checkbox') {
-      // TypeScript knows `e.target` is `HTMLInputElement` here
+      // TypeScript knows e.target is HTMLInputElement here
       setFormData(prevState => ({
         ...prevState!,
         [name]: (e.target as HTMLInputElement).checked,
       }));
     } else {
-      // TypeScript knows `e.target` is `HTMLTextAreaElement` or `HTMLInputElement` (text) here
+      // TypeScript knows e.target is HTMLTextAreaElement or HTMLInputElement (text) here
       setFormData(prevState => ({
         ...prevState!,
         [name]: value,
@@ -53,38 +47,49 @@ function ProductDetail() {
     }
   };
 
+  // Guarda los cambios en los detalles del producto
   const handleSave = async () => {
-    if (formData) {
+    // Verifica si formData y product son válidos antes de proceder
+    if (formData && product && product.code !== undefined) {
       try {
-        await updateProductsRequest(product.code, formData); // Provide both arguments
-        setProduct({ ...formData }); // Update the product state with the new data
-        setIsEditing(false); // Exit edit mode
+        await updateProductsRequest(product.code, formData);
+        setProduct({ ...formData, code: product.code }); // Actualiza el estado del producto
+        setIsEditing(false); // Salir del modo de edición
       } catch (error) {
-        console.error("Error updating product:", error);
+        console.error("Error al actualizar el producto:", error);
       }
+    } else {
+      console.warn("No se puede guardar el producto. formData o product son inválidos.");
     }
   };
 
+  // Descarga el código QR como una imagen
   const downloadQRCode = () => {
     if (qrRef.current) {
       const canvas = qrRef.current.querySelector('canvas');
       if (canvas) {
-        const image = canvas.toDataURL('image/png'); // Convert canvas to image URL
+        const image = canvas.toDataURL('image/png'); // Convierte el canvas a una URL de imagen
         const link = document.createElement('a');
         link.href = image;
-        link.download = 'qrcode.png'; // Name of the file to download
-        link.click(); // Simulate click to download
+        link.download = 'qrcode.png'; // Nombre del archivo para descargar
+        link.click(); // Simula un clic para descargar
       }
     }
   };
 
+  // Muestra texto de carga mientras se obtienen los datos
+  if (!product) {
+    return <p>Cargando...</p>;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-black text-white">
+      {/* Sección de encabezado */}
       <header className="w-full bg-gray-800 p-4 flex items-center justify-between relative">
         <div className="flex-none">
           <Link to="/">
             <button className="bg-green-500 text-white px-5 py-2 rounded-lg">
-              Back
+              Regresar
             </button>
           </Link>
         </div>
@@ -93,31 +98,42 @@ function ProductDetail() {
         </div>
         <div className="absolute top-4 right-4">
           <button
-            onClick={handleEditClick}
+            onClick={() => setIsEditing(true)}
             className="bg-yellow-500 text-white px-4 py-2 rounded"
           >
-            Edit Product
+            Editar Producto
           </button>
         </div>
       </header>
+
+      {/* Sección de contenido principal */}
       <main className="flex-1 flex justify-center items-center p-4">
         <div className="bg-black p-8 rounded-lg shadow-lg text-center w-full max-w-4xl">
           {isEditing ? (
             <div>
-              <h2 className="text-2xl font-bold mb-4">Edit Product</h2>
+              <h2 className="text-2xl font-bold mb-4">Editar Producto</h2>
               <form>
+                {/* Campos del formulario para editar el producto */}
                 <input
                   name="code"
                   type="text"
-                  placeholder="Enter product code"
+                  placeholder="Ingrese el código del producto"
                   value={formData?.code || ''}
+                  onChange={handleChange}
+                  className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
+                />
+                <input
+                  name="available"
+                  type="text"
+                  placeholder="Ingrese la cantidad disponible"
+                  value={formData?.available || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
                 />
                 <input
                   name="type"
                   type="text"
-                  placeholder="Kind of product"
+                  placeholder="Tipo de producto"
                   value={formData?.type || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -125,7 +141,7 @@ function ProductDetail() {
                 <input
                   name="duration"
                   type="text"
-                  placeholder="Enter duration"
+                  placeholder="Ingrese duración"
                   value={formData?.duration || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -133,7 +149,7 @@ function ProductDetail() {
                 <input
                   name="amount"
                   type="text"
-                  placeholder="Enter amount"
+                  placeholder="Ingrese cantidad"
                   value={formData?.amount || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -141,7 +157,7 @@ function ProductDetail() {
                 <input
                   name="brand"
                   type="text"
-                  placeholder="Enter brand"
+                  placeholder="Ingrese marca"
                   value={formData?.brand || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -149,7 +165,7 @@ function ProductDetail() {
                 <input
                   name="line"
                   type="text"
-                  placeholder="Enter line"
+                  placeholder="Ingrese línea"
                   value={formData?.line || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -157,7 +173,7 @@ function ProductDetail() {
                 <input
                   name="scent"
                   type="text"
-                  placeholder="Enter scent"
+                  placeholder="Ingrese aroma"
                   value={formData?.scent || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -165,7 +181,7 @@ function ProductDetail() {
                 <textarea
                   name="description"
                   rows={3}
-                  placeholder="Write a description"
+                  placeholder="Escriba una descripción"
                   value={formData?.description || ''}
                   onChange={handleChange}
                   className="border-2 border-gray-700 p-2 rounded-lg bg-zinc-800 block w-full my-2"
@@ -178,40 +194,42 @@ function ProductDetail() {
                     onChange={handleChange}
                     className="form-checkbox h-5 w-5 text-indigo-600 transition duration-150 ease-in-out"
                   />
-                  <span>Stock</span>
+                  <span>En Stock</span>
                 </label>
                 <button
                   type="button"
                   onClick={handleSave}
                   className="bg-indigo-500 text-white px-4 py-2 rounded mt-4"
                 >
-                  Save Changes
+                  Guardar Cambios
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
                   className="bg-gray-500 text-white px-4 py-2 rounded mt-4 ml-2"
                 >
-                  Cancel
+                  Cancelar
                 </button>
               </form>
             </div>
           ) : (
             <div>
-              <h1 className="text-2xl font-bold mb-4">Product Code: {product.code}</h1>
-              <p><strong>Description:</strong> {product.description}</p>
-              <p><strong>Duration:</strong> {product.duration}</p>
-              <p><strong>Amount:</strong> {product.amount}</p>
-              <p><strong>Brand:</strong> {product.brand}</p>
-              <p><strong>Line:</strong> {product.line}</p>
-              <p><strong>Scent:</strong> {product.scent}</p>
-              <p><strong>Type:</strong> {product.type}</p>
-              <p><strong>In Stock:</strong> {product.stock ? "Yes" : "No"}</p>
-              <p><strong>Created At:</strong> {product.createdAt?.toString()}</p>
-              <p><strong>Updated At:</strong> {product.updatedAt?.toString()}</p>
+              <h1 className="text-2xl font-bold mb-4">Código del Producto: {product.code}</h1>
+              {/* Mostrar los detalles del producto */}
+              <p><strong>Descripción:</strong> {product.description}</p>
+              <p><strong>Duración:</strong> {product.duration}</p>
+              <p><strong>Cantidad:</strong> {product.amount}</p>
+              <p><strong>Marca:</strong> {product.brand}</p>
+              <p><strong>Línea:</strong> {product.line}</p>
+              <p><strong>Aroma:</strong> {product.scent}</p>
+              <p><strong>Tipo:</strong> {product.type}</p>
+              <p><strong>En Stock:</strong> {product.stock ? "Sí" : "No"}</p>
+              <p><strong>Creación:</strong> {product.createdAt?.toString()}</p>
+              <p><strong>Modificación:</strong> {product.updatedAt?.toString()}</p>
+              <p><strong>Disponible:</strong> {product.available}</p>
 
               <div className="mt-8">
-                <h1 className="text-2xl font-bold ">Product Detail</h1>
+                <h2 className="text-2xl font-bold">Código QR del Producto</h2>
                 <div ref={qrRef} className="mb-4 flex justify-center">
                   <QRCode value={`https://jumahumitosfront.onrender.com/product/${product.code}`} />
                 </div>
@@ -219,7 +237,7 @@ function ProductDetail() {
                   onClick={downloadQRCode}
                   className="bg-indigo-500 text-white px-4 py-2 rounded"
                 >
-                  Download QR Code
+                  Descargar Código QR
                 </button>
               </div>
             </div>
